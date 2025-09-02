@@ -27,8 +27,8 @@ model User {
   orders       Order[]
 }
 
-model product {
-  id          String   @id @default(cuid())
+model Product {
+  id          String      @id @default(cuid())
   name        String
   brand       String
   description String
@@ -41,9 +41,12 @@ model product {
   soldCount   Int
   rating      Float?
   images      String[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isFeatured  Boolean  @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  isFeatured  Boolean     @default(false)
+
+  // ✅ Back relation to CartItem
+  cartItems   CartItem[]
 }
 
 model Cart {
