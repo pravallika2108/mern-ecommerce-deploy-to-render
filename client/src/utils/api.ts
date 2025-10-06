@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://localhost:3001";
+export const API_BASE_URL = "https://mern-ecommerce-deploy-to-render-9.onrender.com";
 
 export const API_ROUTES = {
   AUTH: `${API_BASE_URL}/api/auth`,
