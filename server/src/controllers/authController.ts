@@ -33,7 +33,7 @@ async function setTokens(
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60,
+    maxAge: 7 * 24 * 60 * 60*1000,
   });
 }
 
@@ -83,17 +83,22 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     ) {
       res.status(401).json({
         success: false,
-        error: "Invalied credentials",
+        error: "Invalid credentials",
       });
 
       return;
     }
+
     //create our access and refreshtoken
     const { accessToken, refreshToken } = generateToken(
       extractCurrentUser.id,
       extractCurrentUser.email,
       extractCurrentUser.role
     );
+    await prisma.user.update({
+  where: { id: extractCurrentUser.id },
+  data: { refreshToken },
+});
 
     //set out tokens
     await setTokens(res, accessToken, refreshToken);
@@ -146,6 +151,10 @@ export const refreshAccessToken = async (
       user.role
     );
     //set out tokens
+    await prisma.user.update({
+  where: { id: user.id },
+  data: { refreshToken: newRefreshToken },
+});
     await setTokens(res, accessToken, newRefreshToken);
     res.status(200).json({
       success: true,
@@ -158,10 +167,26 @@ export const refreshAccessToken = async (
 };
 
 export const logout = async (req: Request, res: Response): Promise<void> => {
-  res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
-  res.json({
-    success: true,
-    message: "User logged out successfully",
-  });
+   try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken) {
+      // Optional: Find the user and remove the refresh token
+      await prisma.user.update({
+        where: { refreshToken },
+        data: { refreshToken: null },
+      });
+    }
+
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+
+    res.json({
+      success: true,
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ success: false, error: "Logout failed" });
+  }
 };

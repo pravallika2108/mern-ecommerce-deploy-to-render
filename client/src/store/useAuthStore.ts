@@ -29,6 +29,30 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config;
+
+//     if (
+//       error.response?.status === 401 &&
+//       !originalRequest._retry // avoid infinite loops
+//     ) {
+//       originalRequest._retry = true;
+//       const refreshSuccess = await useAuthStore.getState().refreshAccessToken();
+
+//       if (refreshSuccess) {
+//         return axiosInstance(originalRequest); // retry original request
+//       } else {
+//         await useAuthStore.getState().logout();
+//         window.location.href = "/login"; // redirect user to login page
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({

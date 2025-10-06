@@ -33,9 +33,11 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   fetchBanners: async () => {
     set({ isLoading: true, error: null });
     try {
+      console.log(API_ROUTES.SETTINGS)
       const response = await axios.get(`${API_ROUTES.SETTINGS}/get-banners`, {
         withCredentials: true,
       });
+      console.log(response.data)
       set({ banners: response.data.banners, isLoading: false });
     } catch (e) {
       console.error(e);

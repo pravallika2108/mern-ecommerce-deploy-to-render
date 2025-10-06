@@ -7,12 +7,12 @@
 
 */
 -- AlterTable
-ALTER TABLE "public"."CartItem" DROP COLUMN "createdAt",
-DROP COLUMN "updatedAt",
+-- ALTER TABLE "public"."CartItem" DROP COLUMN "createdAt",
+-- DROP COLUMN "updatedAt",
 ALTER COLUMN "color" DROP NOT NULL;
 
 -- DropTable
-DROP TABLE "public"."product";
+-- DROP TABLE "public"."product";
 
 -- CreateTable
 CREATE TABLE "public"."Product" (
