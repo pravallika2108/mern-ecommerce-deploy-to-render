@@ -1,14 +1,26 @@
+"use client"
 import { Suspense } from "react";
 import ProductDetailsSkeleton from "./productSkeleton";
 import ProductDetailsContent from "./productDetails";
+import { API_ROUTES } from "@/utils/api";
+import axios from "axios"
 
-async function ProductDetailsPage({ params }: { params: { id: string } }) {
+
+
+
+type PageParams = { id: string };
+
+export default async function ProductDetailsPage({
+  params,
+}: {
+  params: Promise<PageParams>;
+}) {
+  const resolvedParams = await params;
 
   return (
     <Suspense fallback={<ProductDetailsSkeleton />}>
-      <ProductDetailsContent id={params.id} />
+      <ProductDetailsContent id={resolvedParams.id} />
     </Suspense>
   );
 }
 
-export default ProductDetailsPage;
