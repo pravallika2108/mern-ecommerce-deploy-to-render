@@ -10,7 +10,7 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
     
   },
   "include": ["src/**/*", "prisma/**/*"],

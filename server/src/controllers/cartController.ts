@@ -1,6 +1,8 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
+import { CartItem } from "@prisma/client";
 import { prisma } from "../server";
+
 
 // export const addToCart = async (
 //   req: AuthenticatedRequest,
@@ -200,7 +202,7 @@ export const getCart = async (
     }
 
     const cartItemsWithProducts = await Promise.all(
-      cart?.items.map(async (item) => {
+      cart?.items.map(async (item:CartItem) => {
         const product = await prisma.product.findUnique({
           where: { id: item.productId },
           select: {
@@ -220,7 +222,7 @@ export const getCart = async (
           size: item.size,
           quantity: item.quantity,
         };
-      })
+      })?? []
     );
 
     res.json({
