@@ -23,7 +23,7 @@ const allowedOrigins = [
 ];
 
 const corsOptions = {
-  origin: allowedOrigin,
+  origin: allowedOrigins,
   credentials: true, // Allow cookies
 };
 
