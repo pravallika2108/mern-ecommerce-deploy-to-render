@@ -46,9 +46,9 @@ export async function middleware(request: NextRequest) {
       console.error("Token verification failed", e);
 
       // Use your deployed backend URL for refreshing token
-      const backendUrl =
-        "https://mern-ecommerce-deploy-to-render-9.onrender.com/api/auth/refresh-token";
-
+     const backendUrl = process.env.NEXT_PUBLIC_API_URL 
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh-token`
+        : "http://localhost:3001/api/auth/refresh-token";
       const refreshResponse = await fetch(backendUrl, {
         method: "POST",
         headers: {
