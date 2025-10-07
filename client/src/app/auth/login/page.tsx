@@ -50,7 +50,7 @@ function LoginPage() {
       });
       const user = useAuthStore.getState().user;
       if (user?.role === "SUPER_ADMIN") router.push("/super-admin");
-      else router.replace("/home");
+      else router.push("/home");
     }
   };
   return (
