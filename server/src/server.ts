@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
 import express from "express";
-import cors from "cors";
+import cors,{CorsOptions} from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes";
 import productRoutes from "./routes/productRoutes";
