@@ -14,13 +14,22 @@ import orderRoutes from "./routes/orderRoutes";
 //load all your enviroment variables
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3001;
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:5000'];
 
 app.use(cors({
-  origin: "https://mern-ecommerce-deploy-to-render-11.onrender.com", // frontend URL
-  credentials: true, // allow cookies
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
 }));
-
 app.use(express.json());
 app.use(cookieParser());
 
