@@ -17,16 +17,12 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 
-const allowedOrigins = [
-  
-  'https://mern-ecommerce-deploy-to-render-11.onrender.com', // your frontend URL
-];
-
-const corsOptions = {
-  origin: allowedOrigins,
-  credentials: true, // Allow cookies
-};
-
+app.use(
+  cors({
+    origin: 'https://mern-ecommerce-deploy-to-render-11.onrender.com',
+    credentials: true,
+  })
+);
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
