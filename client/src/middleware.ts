@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const publicRoutes = ["/auth/register", "/auth/login"];
-const superAdminRoutes = ["/super-admin", "/super-admim/:path*"];
+const superAdminRoutes = ["/super-admin", "/super-admin/:path*"];
 const userRoutes = ["/home"];
 
 export async function middleware(request: NextRequest) {
@@ -15,25 +15,24 @@ export async function middleware(request: NextRequest) {
         accessToken,
         new TextEncoder().encode(process.env.JWT_SECRET)
       );
-      const { role } = payload as {
-        role: string;
-      };
+      const { role } = payload as { role: string };
 
+      // If user is already logged in and trying to access auth pages, redirect based on role
       if (publicRoutes.includes(pathname)) {
         return NextResponse.redirect(
-          new URL(
-            role === "SUPER_ADMIN" ? "/super-admin" : "/home",
-            request.url
-          )
+          new URL(role === "SUPER_ADMIN" ? "/super-admin" : "/home", request.url)
         );
       }
 
+      // Super admin trying to access user pages? Redirect to super-admin dashboard
       if (
         role === "SUPER_ADMIN" &&
         userRoutes.some((route) => pathname.startsWith(route))
       ) {
         return NextResponse.redirect(new URL("/super-admin", request.url));
       }
+
+      // Non-super-admin trying to access super-admin pages? Redirect to user home
       if (
         role !== "SUPER_ADMIN" &&
         superAdminRoutes.some((route) => pathname.startsWith(route))
@@ -41,29 +40,30 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/home", request.url));
       }
 
+      // Everything's fine, let them continue
       return NextResponse.next();
     } catch (e) {
       console.error("Token verification failed", e);
-      const refreshResponse = await fetch(
-        "https://mern-ecommerce-deploy-to-render-9.onrender.com/api/auth/refresh-token",
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
+
+      // Use your deployed backend URL for refreshing token
+      const backendUrl =
+        "https://mern-ecommerce-deploy-to-render-9.onrender.com/api/auth/refresh-token";
+
+      const refreshResponse = await fetch(backendUrl, {
+        method: "POST",
+        headers: {
+          // Forward cookies so backend gets the refreshToken cookie
+          cookie: request.headers.get("cookie") || "",
+        },
+        credentials: "include",
+      });
 
       if (refreshResponse.ok) {
-        const response = NextResponse.next();
-        response.cookies.set(
-          "accessToken",
-          refreshResponse.headers.get("Set-Cookie") || ""
-        );
-        return response;
+        // Tokens refreshed successfully; continue to requested page
+        return NextResponse.next();
       } else {
-        //ur refresh is also failed
-        const response = NextResponse.redirect(
-          new URL("/auth/login", request.url)
-        );
+        // Refresh token invalid/expired; clear cookies and redirect to login
+        const response = NextResponse.redirect(new URL("/auth/login", request.url));
         response.cookies.delete("accessToken");
         response.cookies.delete("refreshToken");
         return response;
@@ -71,13 +71,15 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // No access token and trying to access a protected route -> redirect to login
   if (!publicRoutes.includes(pathname)) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
+  // Public route - allow access
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"], // Protect all routes except API and static files
 };
