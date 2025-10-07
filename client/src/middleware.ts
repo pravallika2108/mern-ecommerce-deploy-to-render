@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
     } catch (e) {
       console.error("Token verification failed", e);
       const refreshResponse = await fetch(
-        "http://localhost:3000/api/auth/refresh-token",
+        "https://mern-ecommerce-deploy-to-render-9.onrender.com/api/auth/refresh-token",
         {
           method: "POST",
           credentials: "include",
