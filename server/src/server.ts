@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 10000;
 
 
 const allowedOrigins = [
-  'http://localhost:3000',
+  
   'https://mern-ecommerce-deploy-to-render-11.onrender.com', // your frontend URL
 ];
 
