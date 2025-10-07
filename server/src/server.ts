@@ -16,11 +16,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-app.options("*", cors({
-  origin: 'https://mern-ecommerce-deploy-to-render-11.onrender.com',
-  credentials: true,
+app.use(cors({
+  origin: "https://mern-ecommerce-deploy-to-render-11.onrender.com", // frontend URL
+  credentials: true, // allow cookies
 }));
-
 
 app.use(express.json());
 app.use(cookieParser());
