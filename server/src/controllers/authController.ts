@@ -190,3 +190,33 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ success: false, error: "Logout failed" });
   }
 };
+export const getCurrentUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const accessToken = req.cookies.accessToken;
+    
+    if (!accessToken) {
+      res.status(401).json({ success: false, error: "Not authenticated" });
+      return;
+    }
+
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!) as {
+      userId: string;
+      email: string;
+      role: string;
+    };
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, name: true, email: true, role: true }
+    });
+
+    if (!user) {
+      res.status(401).json({ success: false, error: "User not found" });
+      return;
+    }
+
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(401).json({ success: false, error: "Invalid token" });
+  }
+};
