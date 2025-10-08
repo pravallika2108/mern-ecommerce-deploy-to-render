@@ -14,6 +14,8 @@ type AuthStore = {
   user: User | null;
   isLoading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
+  checkAuth: () => Promise<void>;
   register: (
     name: string,
     email: string,
@@ -32,36 +34,46 @@ const axiosInstance = axios.create({
   }
 });
 
-// axiosInstance.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     const originalRequest = error.config;
-
-//     if (
-//       error.response?.status === 401 &&
-//       !originalRequest._retry // avoid infinite loops
-//     ) {
-//       originalRequest._retry = true;
-//       const refreshSuccess = await useAuthStore.getState().refreshAccessToken();
-
-//       if (refreshSuccess) {
-//         return axiosInstance(originalRequest); // retry original request
-//       } else {
-//         await useAuthStore.getState().logout();
-//         window.location.href = "/login"; // redirect user to login page
-//       }
-//     }
-
-//     return Promise.reject(error);
-//   }
-// );
-
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
       user: null,
       isLoading: false,
       error: null,
+      isAuthenticated: false,
+
+      // New function to check authentication status
+      checkAuth: async () => {
+        try {
+          const response = await axiosInstance.get("/me");
+          
+          if (response.data.success && response.data.user) {
+            set({ user: response.data.user, isAuthenticated: true });
+          } else {
+            set({ user: null, isAuthenticated: false });
+          }
+        } catch (error) {
+          // Try to refresh token
+          const refreshSuccess = await get().refreshAccessToken();
+          
+          if (refreshSuccess) {
+            // Retry getting user info
+            try {
+              const response = await axiosInstance.get("/me");
+              if (response.data.success && response.data.user) {
+                set({ user: response.data.user, isAuthenticated: true });
+                return;
+              }
+            } catch (e) {
+              // Refresh worked but still can't get user
+            }
+          }
+          
+          // Authentication failed
+          set({ user: null, isAuthenticated: false });
+        }
+      },
+
       register: async (name, email, password) => {
         set({ isLoading: true, error: null });
         try {
@@ -84,34 +96,45 @@ export const useAuthStore = create<AuthStore>()(
           return null;
         }
       },
+
       login: async (email, password) => {
-  set({ isLoading: true, error: null });
-  try {
-    const response = await axiosInstance.post("/login", {
-      email,
-      password,
-    });
+        set({ isLoading: true, error: null });
+        try {
+          const response = await axiosInstance.post("/login", {
+            email,
+            password,
+          });
 
-    set({ isLoading: false, user: response.data.user });
-    return true;
-  } catch (error) {
-    const errorMessage = axios.isAxiosError(error)
-      ? error?.response?.data?.error || error.message || "Login failed"
-      : "Login failed";
-    
-    set({
-      isLoading: false,
-      error: errorMessage,
-    });
+          set({ 
+            isLoading: false, 
+            user: response.data.user,
+            isAuthenticated: true 
+          });
+          return true;
+        } catch (error) {
+          const errorMessage = axios.isAxiosError(error)
+            ? error?.response?.data?.error || error.message || "Login failed"
+            : "Login failed";
 
-    return false;
-  }
-},
+          set({
+            isLoading: false,
+            error: errorMessage,
+            isAuthenticated: false,
+          });
+
+          return false;
+        }
+      },
+
       logout: async () => {
         set({ isLoading: true, error: null });
         try {
           await axiosInstance.post("/logout");
-          set({ user: null, isLoading: false });
+          set({ 
+            user: null, 
+            isLoading: false,
+            isAuthenticated: false 
+          });
         } catch (error) {
           set({
             isLoading: false,
@@ -121,6 +144,7 @@ export const useAuthStore = create<AuthStore>()(
           });
         }
       },
+
       refreshAccessToken: async () => {
         try {
           await axiosInstance.post("/refresh-token");
