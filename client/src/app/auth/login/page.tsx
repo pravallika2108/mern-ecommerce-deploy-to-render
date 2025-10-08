@@ -29,30 +29,37 @@ function LoginPage() {
     }));
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
+const handleSubmit = async (event: React.FormEvent) => {
   event.preventDefault();
-  const checkFirstLevelOfValidation = await protectSignInAction(
-    formData.email
-  );
 
-  if (!checkFirstLevelOfValidation.success) {
+  // First level validation via Arcjet
+  const arcjetResult = await protectSignInAction(formData.email);
+
+  if (!arcjetResult.success) {
     toast({
-      title: checkFirstLevelOfValidation.error,
+      title: arcjetResult.error,
       variant: "destructive",
     });
     return;
   }
 
+  // Login via auth store
   const success = await login(formData.email, formData.password);
+
   if (success) {
-    toast({
-      title: "Login Successful!",
-    });
+    toast({ title: "Login Successful!" });
+
+    // Get the latest user info from the store
     const user = useAuthStore.getState().user;
-    if (user?.role === "SUPER_ADMIN") router.push("/super-admin");
-    else router.push("/home");
+
+    // Redirect based on role
+    if (user?.role === "SUPER_ADMIN") {
+      router.replace("/super-admin"); // use replace to avoid going back to login
+    } else {
+      router.replace("/home");
+    }
   } else {
-    // Show error from the store
+    // Login failed
     const error = useAuthStore.getState().error;
     toast({
       title: error || "Login failed",
