@@ -15,13 +15,12 @@ import orderRoutes from "./routes/orderRoutes";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT ;
-
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
+const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:5000'];
-
+  : ['https://mern-ecommerce-deploy-to-render-11.onrender.com'];
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, Postman, or same-origin)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -29,6 +28,9 @@ app.use(cors({
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  exposedHeaders: ['Set-Cookie'],
 }));
 app.use(express.json());
 app.use(cookieParser());
