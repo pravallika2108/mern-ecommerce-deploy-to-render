@@ -30,29 +30,36 @@ function LoginPage() {
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const checkFirstLevelOfValidation = await protectSignInAction(
-      formData.email
-    );
+  event.preventDefault();
+  const checkFirstLevelOfValidation = await protectSignInAction(
+    formData.email
+  );
 
-    if (!checkFirstLevelOfValidation.success) {
-      toast({
-        title: checkFirstLevelOfValidation.error,
-        variant: "destructive",
-      });
-      return;
-    }
+  if (!checkFirstLevelOfValidation.success) {
+    toast({
+      title: checkFirstLevelOfValidation.error,
+      variant: "destructive",
+    });
+    return;
+  }
 
-    const success = await login(formData.email, formData.password);
-    if (success) {
-      toast({
-        title: "Login Successfull!",
-      });
-      const user = useAuthStore.getState().user;
-      if (user?.role === "SUPER_ADMIN") router.push("/super-admin");
-      else router.push("/home");
-    }
-  };
+  const success = await login(formData.email, formData.password);
+  if (success) {
+    toast({
+      title: "Login Successful!",
+    });
+    const user = useAuthStore.getState().user;
+    if (user?.role === "SUPER_ADMIN") router.push("/super-admin");
+    else router.push("/home");
+  } else {
+    // Show error from the store
+    const error = useAuthStore.getState().error;
+    toast({
+      title: error || "Login failed",
+      variant: "destructive",
+    });
+  }
+};
   return (
     <div className="min-h-screen bg-[#fff6f4] flex">
       <div className="hidden lg:block w-1/2 bg-[#ffede1] relative overflow-hidden">
