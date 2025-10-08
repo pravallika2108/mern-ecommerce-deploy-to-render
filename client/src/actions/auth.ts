@@ -18,7 +18,7 @@ export const protectSignUpAction = async (email: string) => {
     const decision = (await Promise.race([
       protectSignupRules.protect(req, { email }),
       new Promise<ArcjetDecision>((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), 3000)
+        setTimeout(() => reject(new Error("Timeout")), 10000)
       )
     ])) as ArcjetDecision; // <-- type assertion added
 
@@ -56,7 +56,7 @@ export const protectSignInAction = async (email: string) => {
     const decision = (await Promise.race([
       protectLoginRules.protect(req, { email }),
       new Promise<ArcjetDecision>((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), 3000)
+        setTimeout(() => reject(new Error("Timeout")), 10000)
       )
     ])) as ArcjetDecision; // <-- type assertion added
 
