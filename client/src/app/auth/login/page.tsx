@@ -33,6 +33,17 @@ const handleSubmit = async (event: React.FormEvent) => {
   event.preventDefault();
 
   // First level validation via Arcjet
+   const checkFirstLevelOfValidation = await protectSignInAction(
+      formData.email
+    );
+
+    if (!checkFirstLevelOfValidation.success) {
+      toast({
+        title: checkFirstLevelOfValidation.error,
+        variant: "destructive",
+      });
+      return;
+    }
   
   // Login via auth store
   const success = await login(formData.email, formData.password);
