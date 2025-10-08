@@ -21,7 +21,7 @@ const tryArcjet = async (
   try {
     const req = await request();
     const decision = (await Promise.race([
-      fn(req, { email }),
+      fn(req), // <-- only req is passed
       new Promise<ArcjetDecision>((_, reject) =>
         setTimeout(() => reject(new Error("Timeout")), 10000)
       )
@@ -38,7 +38,7 @@ const tryArcjet = async (
 };
 
 export const protectSignUpAction = async (email: string) => {
-  const decision = await tryArcjet(protectSignupRules.protect, email, 1);
+  const decision = await tryArcjet((req) => protectSignupRules.protect(req, { email }), email, 1);
 
   if (!decision) return { success: true }; // fallback if Arcjet fails
 
@@ -66,7 +66,7 @@ export const protectSignUpAction = async (email: string) => {
 };
 
 export const protectSignInAction = async (email: string) => {
-  const decision = await tryArcjet(protectLoginRules.protect, email, 1);
+  const decision = await tryArcjet((req) => protectLoginRules.protect(req, { email }), email, 1);
 
   if (!decision) return { success: true }; // fallback if Arcjet fails
 
@@ -90,3 +90,4 @@ export const protectSignInAction = async (email: string) => {
 
   return { success: true };
 };
+
