@@ -14,24 +14,31 @@ import orderRoutes from "./routes/orderRoutes";
 //load all your enviroment variables
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT ;
+const PORT = process.env.PORT;
+
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['https://mern-ecommerce-deploy-to-render-11.onrender.com'];
+  : ['https://mern-ecommerce-deploy-to-render-11.onrender.com', 'http://localhost:3000'];
+
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, Postman, or same-origin)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
     }
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
   exposedHeaders: ['Set-Cookie'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -51,6 +58,7 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server is now running on port ${PORT}`);
+  console.log(`Allowed origins:`, allowedOrigins);
 });
 
 process.on("SIGINT", async () => {
