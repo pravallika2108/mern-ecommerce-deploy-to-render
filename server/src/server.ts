@@ -42,7 +42,24 @@ const corsOptions = {
   exposedHeaders: ['Set-Cookie'],
   optionsSuccessStatus: 200
 };
-app.use(cors(corsOptions));
+// Simple CORS - allow all origins temporarily for testing
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin || '')) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, X-Requested-With');
+    res.header('Access-Control-Expose-Headers', 'Set-Cookie');
+  }
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
 // Handle preflight requests explicitly
 app.options('*', cors(corsOptions));
 
