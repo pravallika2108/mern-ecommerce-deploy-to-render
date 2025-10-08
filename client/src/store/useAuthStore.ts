@@ -82,26 +82,28 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
       login: async (email, password) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await axiosInstance.post("/login", {
-            email,
-            password,
-          });
+  set({ isLoading: true, error: null });
+  try {
+    const response = await axiosInstance.post("/login", {
+      email,
+      password,
+    });
 
-          set({ isLoading: false, user: response.data.user });
-          return true;
-        } catch (error) {
-          set({
-            isLoading: false,
-            error: axios.isAxiosError(error)
-              ? error?.response?.data?.error || "Login failed"
-              : "Login failed",
-          });
+    set({ isLoading: false, user: response.data.user });
+    return true;
+  } catch (error) {
+    const errorMessage = axios.isAxiosError(error)
+      ? error?.response?.data?.error || error.message || "Login failed"
+      : "Login failed";
+    
+    set({
+      isLoading: false,
+      error: errorMessage,
+    });
 
-          return false;
-        }
-      },
+    return false;
+  }
+},
       logout: async () => {
         set({ isLoading: true, error: null });
         try {
