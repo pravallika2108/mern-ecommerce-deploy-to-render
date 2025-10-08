@@ -26,18 +26,14 @@ async function setTokens(
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "none" as const,
+    sameSite: "none",
     maxAge: 60 * 60 * 1000,
-    path:'/',
-    domain:undefined
   });
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "none" as const,
-    maxAge: 7 * 24 * 60 * 60*1000,
-    path:'/',
-    domain:undefined
+    sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }
 
