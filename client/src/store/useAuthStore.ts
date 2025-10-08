@@ -27,6 +27,9 @@ type AuthStore = {
 const axiosInstance = axios.create({
   baseURL: API_ROUTES.AUTH,
   withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  }
 });
 
 // axiosInstance.interceptors.response.use(
