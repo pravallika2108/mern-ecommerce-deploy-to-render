@@ -23,19 +23,22 @@ async function setTokens(
   accessToken: string,
   refreshToken: string
 ) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: isProduction,  // Only require HTTPS in production
+    sameSite: isProduction ? "none" : "lax",  // "lax" for development
     maxAge: 60 * 60 * 1000,
   });
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: isProduction,  // Only require HTTPS in production
+    sameSite: isProduction ? "none" : "lax",  // "lax" for development
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }
+
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
