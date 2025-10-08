@@ -1,8 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import banner from "../../../../public/images/banner2.jpg";
-import logo from "../../../../public/images/logo1.png";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,11 +27,10 @@ function LoginPage() {
     }));
   };
 
-const handleSubmit = async (event: React.FormEvent) => {
-  event.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
-  // First level validation via Arcjet
-   const checkFirstLevelOfValidation = await protectSignInAction(
+    const checkFirstLevelOfValidation = await protectSignInAction(
       formData.email
     );
 
@@ -44,85 +41,99 @@ const handleSubmit = async (event: React.FormEvent) => {
       });
       return;
     }
-  
-  // Login via auth store
-  const success = await login(formData.email, formData.password);
 
-  if (success) {
-    toast({ title: "Login Successful!" });
+    const success = await login(formData.email, formData.password);
 
-    // Get the latest user info from the store
-    const user = useAuthStore.getState().user;
+    if (success) {
+      toast({ title: "Login Successful!" });
 
-    // Redirect based on role
-    if (user?.role === "SUPER_ADMIN") {
-      router.replace("/super-admin"); // use replace to avoid going back to login
+      const user = useAuthStore.getState().user;
+
+      if (user?.role === "SUPER_ADMIN") {
+        router.replace("/super-admin");
+      } else {
+        router.replace("/home");
+      }
     } else {
-      router.replace("/home");
+      const error = useAuthStore.getState().error;
+      toast({
+        title: error || "Login failed",
+        variant: "destructive",
+      });
     }
-  } else {
-    // Login failed
-    const error = useAuthStore.getState().error;
-    toast({
-      title: error || "Login failed",
-      variant: "destructive",
-    });
-  }
-};
+  };
+
   return (
-    <div className="min-h-screen bg-[#fff6f4] flex">
-      <div className="hidden lg:block w-1/2 bg-[#ffede1] relative overflow-hidden">
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Left Side - Banner Image (Hidden on mobile, visible on large screens) */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-orange-100">
         <Image
-          src={banner}
-          alt="Register"
+          src="/images/banner2.jpg"
+          alt="Login Banner"
           fill
-          style={{ objectFit: "cover", objectPosition: "center" }}
+          className="object-cover"
           priority
         />
       </div>
-      <div className="w-full lg:w-1/2 flex flex-col p-8 lg:p-16 justify-center">
-        <div className="max-w-md w-full mx-auto">
-          <div className="flex justify-center">
-            <Image src={logo} width={200} height={50} alt="Logo" />
+
+      {/* Right Side - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-orange-50">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <Image 
+              src="/images/logo1.png" 
+              width={200} 
+              height={50} 
+              alt="Logo"
+            />
           </div>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-1">
-              <Label htmlFor="name">Email</Label>
+
+          {/* Login Form */}
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                className="bg-[#ffede1]"
+                className="bg-orange-100 border-orange-200"
                 placeholder="Enter your email"
                 required
                 value={formData.email}
                 onChange={handleOnChange}
+                disabled={isLoading}
               />
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="name">Password</Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                className="bg-[#ffede1]"
+                className="bg-orange-100 border-orange-200"
                 placeholder="Enter your password"
                 required
                 value={formData.password}
                 onChange={handleOnChange}
+                disabled={isLoading}
               />
             </div>
+
             <Button
               type="submit"
-              className="w-full bg-black text-white hover:bg-black transition-colors"
+              className="w-full bg-black text-white hover:bg-gray-800"
+              disabled={isLoading}
             >
-              LOGIN
+              {isLoading ? "Logging in..." : "LOGIN"}
             </Button>
-            <p className="text-center text-[#3f3d56] text-sm">
-              New here{" "}
+
+            <p className="text-center text-gray-600 text-sm">
+              New here?{" "}
               <Link
-                href={"/auth/register"}
-                className="text-[#000] hover:underline font-bold"
+                href="/auth/register"
+                className="text-black hover:underline font-bold"
               >
                 Sign up
               </Link>
