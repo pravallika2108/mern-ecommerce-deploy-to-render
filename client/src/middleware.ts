@@ -5,7 +5,7 @@ const publicRoutes = ["/auth/register", "/auth/login"];
 export async function middleware(request: NextRequest) {
   const accessToken = request.cookies.get("accessToken")?.value;
   const { pathname } = request.nextUrl;
-
+ console.log(accessToken);
   // If user has access token and trying to access public routes, redirect to home
   if (accessToken && publicRoutes.includes(pathname)) {
     return NextResponse.redirect(new URL("/home", request.url));
