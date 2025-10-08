@@ -14,7 +14,7 @@ import orderRoutes from "./routes/orderRoutes";
 //load all your enviroment variables
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT ;
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',')
