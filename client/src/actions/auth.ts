@@ -1,6 +1,15 @@
 "use server";
 import { protectLoginRules, protectSignupRules } from "@/arcjet";
 import { request } from "@arcjet/next";
+type ArcjetDecision = {
+  isDenied: () => boolean;
+  reason: {
+    isEmail: () => boolean;
+    isBot?: () => boolean;
+    isRateLimit?: () => boolean;
+    emailTypes?: string[];
+  };
+};
 
 export const protectSignUpAction = async (email: string) => {
   try {
